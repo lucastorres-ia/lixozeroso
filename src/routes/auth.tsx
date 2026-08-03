@@ -86,7 +86,12 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) {
-      toast.error("Não foi possível entrar. Verifique e-mail e senha.");
+      const m = error.message.toLowerCase();
+      toast.error(
+        m.includes("not confirmed")
+          ? "Confirme seu e-mail antes de entrar."
+          : "E-mail ou senha incorretos.",
+      );
       return;
     }
     await queryClient.invalidateQueries();
@@ -111,11 +116,20 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) {
-      toast.error(
-        error.message.includes("already")
-          ? "Este e-mail já está cadastrado."
-          : "Não foi possível criar a conta.",
-      );
+      const m = error.message.toLowerCase();
+      let msg = `Não foi possível criar a conta: ${error.message}`;
+      if (m.includes("already") || m.includes("registered")) {
+        msg = "Este e-mail já está cadastrado. Use a aba Entrar.";
+      } else if (m.includes("weak") || m.includes("pwned")) {
+        msg = "Essa senha é muito fraca ou comum. Escolha outra com letras e números.";
+      } else if (m.includes("password")) {
+        msg = "A senha deve ter no mínimo 6 caracteres.";
+      } else if (m.includes("invalid") && m.includes("email")) {
+        msg = "E-mail inválido. Confira o endereço digitado.";
+      } else if (m.includes("rate") || m.includes("seconds")) {
+        msg = "Muitas tentativas. Aguarde alguns instantes e tente de novo.";
+      }
+      toast.error(msg);
       return;
     }
     if (!data.session) {

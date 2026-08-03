@@ -31,7 +31,7 @@ export const meQueryOptions = {
       salaId: profile?.sala_id ?? null,
       salaNome: (profile?.salas as { nome: string } | null)?.nome ?? null,
       isAdmin: (roles ?? []).some((r) => r.role === "admin"),
-      hasAnyAdmin: (adminCount ?? 0) > 0,
+      hasAnyAdmin: adminExists === true,
     };
   },
   staleTime: 30_000,

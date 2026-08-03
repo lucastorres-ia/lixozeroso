@@ -14,16 +14,189 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      coletas: {
+        Row: {
+          avaliado_em: string | null
+          avaliado_por: string | null
+          created_at: string
+          id: string
+          material_id: string
+          observacao: string | null
+          pontos: number
+          quantidade: number
+          sala_id: string
+          status: Database["public"]["Enums"]["coleta_status"]
+          user_id: string
+        }
+        Insert: {
+          avaliado_em?: string | null
+          avaliado_por?: string | null
+          created_at?: string
+          id?: string
+          material_id: string
+          observacao?: string | null
+          pontos?: number
+          quantidade: number
+          sala_id: string
+          status?: Database["public"]["Enums"]["coleta_status"]
+          user_id: string
+        }
+        Update: {
+          avaliado_em?: string | null
+          avaliado_por?: string | null
+          created_at?: string
+          id?: string
+          material_id?: string
+          observacao?: string | null
+          pontos?: number
+          quantidade?: number
+          sala_id?: string
+          status?: Database["public"]["Enums"]["coleta_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coletas_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materiais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coletas_sala_id_fkey"
+            columns: ["sala_id"]
+            isOneToOne: false
+            referencedRelation: "salas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      materiais: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          id: string
+          nome: string
+          pontos_por_unidade: number
+          unidade: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome: string
+          pontos_por_unidade?: number
+          unidade?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome?: string
+          pontos_por_unidade?: number
+          unidade?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          sala_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          nome?: string
+          sala_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          sala_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_sala_id_fkey"
+            columns: ["sala_id"]
+            isOneToOne: false
+            referencedRelation: "salas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salas: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          turno: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          turno?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          turno?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_admin: { Args: never; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      ranking_salas: {
+        Args: never
+        Returns: {
+          pontos: number
+          quantidade_total: number
+          sala_id: string
+          sala_nome: string
+          total_coletas: number
+          turno: string
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "aluno"
+      coleta_status: "pendente" | "aprovada" | "rejeitada"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +323,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "aluno"],
+      coleta_status: ["pendente", "aprovada", "rejeitada"],
+    },
   },
 } as const

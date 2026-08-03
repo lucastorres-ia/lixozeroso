@@ -76,7 +76,7 @@ function AuthPage() {
     e.preventDefault();
     const parsed = loginSchema.safeParse(loginData);
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0].message);
+      toast.error(parsed.error.issues[0]?.message);
       return;
     }
     setLoading(true);
@@ -97,7 +97,7 @@ function AuthPage() {
     e.preventDefault();
     const parsed = signupSchema.safeParse(signupData);
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0].message);
+      toast.error(parsed.error.issues[0]?.message);
       return;
     }
     setLoading(true);

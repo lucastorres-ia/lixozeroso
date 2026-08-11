@@ -59,7 +59,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Leaf className="size-5" />
             </span>
             <span className="font-display text-lg font-semibold leading-none">
-              EcoColeta
+              Lixo Zero
               <span className="block text-[11px] font-normal text-muted-foreground">
                 Registro escolar de coletas
               </span>
@@ -110,7 +110,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <footer className="border-t border-border/70 py-6">
         <p className="mx-auto max-w-6xl px-4 text-xs text-muted-foreground">
-          EcoColeta — cada quilo registrado vira ponto para a sua sala.
+          Lixo Zero — cada quilo registrado vira ponto para a sua sala.
         </p>
       </footer>
     </div>

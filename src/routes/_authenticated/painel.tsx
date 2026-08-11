@@ -23,15 +23,15 @@ import { useMe } from "@/hooks/use-auth";
 export const Route = createFileRoute("/_authenticated/painel")({
   head: () => ({
     meta: [
-      { title: "Minhas coletas — EcoColeta" },
+      { title: "Minhas coletas — Lixo Zero" },
       {
         name: "description",
         content: "Registre uma nova coleta da sua sala e acompanhe a aprovação dos seus pontos.",
       },
-      { property: "og:title", content: "Minhas coletas — EcoColeta" },
+      { property: "og:title", content: "Minhas coletas — Lixo Zero" },
       {
         property: "og:description",
-        content: "Registre coletas e acompanhe seus pontos no EcoColeta.",
+        content: "Registre coletas e acompanhe seus pontos no Lixo Zero.",
       },
     ],
   }),

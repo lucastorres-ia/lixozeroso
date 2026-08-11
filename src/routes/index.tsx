@@ -13,13 +13,13 @@ import { useMe } from "@/hooks/use-auth";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "EcoColeta — Ranking de coletas por sala" },
+      { title: "Lixo Zero — Ranking de coletas por sala" },
       {
         name: "description",
         content:
           "Veja o ranking das salas, os pontos acumulados e registre as coletas de recicláveis da sua turma.",
       },
-      { property: "og:title", content: "EcoColeta — Ranking de coletas por sala" },
+      { property: "og:title", content: "Lixo Zero — Ranking de coletas por sala" },
       {
         property: "og:description",
         content: "Cada coleta registrada vira pontos para a sua sala no ranking da escola.",

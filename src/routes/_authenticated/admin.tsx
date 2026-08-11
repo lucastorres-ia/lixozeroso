@@ -25,13 +25,13 @@ import { useMe } from "@/hooks/use-auth";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Administração — EcoColeta" },
+      { title: "Administração — Lixo Zero" },
       {
         name: "description",
         content:
-          "Aprove coletas, ajuste a pontuação dos materiais e gerencie salas e usuários do EcoColeta.",
+          "Aprove coletas, ajuste a pontuação dos materiais e gerencie salas e usuários do Lixo Zero.",
       },
-      { property: "og:title", content: "Administração — EcoColeta" },
+      { property: "og:title", content: "Administração — Lixo Zero" },
       {
         property: "og:description",
         content: "Painel de gestão das coletas, salas, materiais e usuários.",

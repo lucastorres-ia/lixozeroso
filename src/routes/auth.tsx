@@ -24,15 +24,15 @@ import { useMe } from "@/hooks/use-auth";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar — EcoColeta" },
+      { title: "Entrar — Lixo Zero" },
       {
         name: "description",
         content: "Acesse sua conta ou cadastre-se escolhendo a sua sala para registrar coletas.",
       },
-      { property: "og:title", content: "Entrar — EcoColeta" },
+      { property: "og:title", content: "Entrar — Lixo Zero" },
       {
         property: "og:description",
-        content: "Acesse sua conta EcoColeta e registre as coletas da sua sala.",
+        content: "Acesse sua conta Lixo Zero e registre as coletas da sua sala.",
       },
     ],
   }),
@@ -148,7 +148,7 @@ function AuthPage() {
           <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-hero-gradient text-primary-foreground">
             <Leaf className="size-6" />
           </span>
-          <h1 className="mt-4 text-2xl font-bold">Acesso ao EcoColeta</h1>
+          <h1 className="mt-4 text-2xl font-bold">Acesso ao Lixo Zero</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Entre para registrar as coletas da sua sala.
           </p>

@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedSalaRouteImport } from './routes/_authenticated/sala'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,6 +52,11 @@ const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSalaRoute = AuthenticatedSalaRouteImport.update({
+  id: '/sala',
+  path: '/sala',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/sala': typeof AuthenticatedSalaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/sala': typeof AuthenticatedSalaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,12 +85,15 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/sala': typeof AuthenticatedSalaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/acesso-admin' | '/auth' | '/admin' | '/painel' | '/perfil'
+  fullPaths:
+    '/' | '/acesso-admin' | '/auth' | '/admin' | '/painel' | '/perfil' | '/sala'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/acesso-admin' | '/auth' | '/admin' | '/painel' | '/perfil'
+  to:
+    '/' | '/acesso-admin' | '/auth' | '/admin' | '/painel' | '/perfil' | '/sala'
   id:
     | '__root__'
     | '/'
@@ -92,6 +103,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/painel'
     | '/_authenticated/perfil'
+    | '/_authenticated/sala'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -152,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/sala': {
+      id: '/_authenticated/sala'
+      path: '/sala'
+      fullPath: '/sala'
+      preLoaderRoute: typeof AuthenticatedSalaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -159,12 +178,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedSalaRoute: typeof AuthenticatedSalaRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedSalaRoute: AuthenticatedSalaRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

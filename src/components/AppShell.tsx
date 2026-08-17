@@ -14,7 +14,9 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
   const items = [
     { to: "/", label: "Ranking" },
-    ...(me ? [{ to: "/painel", label: "Minhas coletas" }] : []),
+    ...(me ? [{ to: "/painel", label: "Registrar coleta" }] : []),
+    ...(me && !me.isAdmin ? [{ to: "/sala", label: "Minha sala" }] : []),
+    ...(me && !me.isAdmin ? [{ to: "/perfil", label: "Meu perfil" }] : []),
     ...(me?.isAdmin ? [{ to: "/admin", label: "Administração" }] : []),
   ];
 

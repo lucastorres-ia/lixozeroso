@@ -78,6 +78,24 @@ export type Database = {
           },
         ]
       }
+      config_admin: {
+        Row: {
+          codigo: string
+          id: boolean
+          updated_at: string
+        }
+        Insert: {
+          codigo: string
+          id?: boolean
+          updated_at?: string
+        }
+        Update: {
+          codigo?: string
+          id?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       materiais: {
         Row: {
           ativo: boolean
@@ -110,18 +128,21 @@ export type Database = {
           created_at: string
           id: string
           nome: string
+          ra: string | null
           sala_id: string | null
         }
         Insert: {
           created_at?: string
           id: string
           nome?: string
+          ra?: string | null
           sala_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           nome?: string
+          ra?: string | null
           sala_id?: string | null
         }
         Relationships: [
@@ -181,8 +202,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_codigo: { Args: never; Returns: string }
       admin_exists: { Args: never; Returns: boolean }
       claim_admin: { Args: never; Returns: boolean }
+      claim_admin_com_codigo: { Args: { _codigo: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -190,6 +213,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      minha_sala: { Args: never; Returns: string }
       ranking_salas: {
         Args: never
         Returns: {
@@ -201,6 +225,7 @@ export type Database = {
           turno: string
         }[]
       }
+      set_admin_codigo: { Args: { _codigo: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "aluno"

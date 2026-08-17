@@ -60,14 +60,14 @@ function AcessoAdmin() {
   async function entrar(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     const parsed = schema.safeParse(login);
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message);
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message); return; }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email: adminUserToEmail(parsed.data.usuario),
       password: parsed.data.senha,
     });
     setLoading(false);
-    if (error) return toast.error("Usuário ou senha de administrador incorretos.");
+    if (error) { toast.error("Usuário ou senha de administrador incorretos."); return; }
     await queryClient.invalidateQueries();
     navigate({ to: "/admin", replace: true });
   }
@@ -75,7 +75,7 @@ function AcessoAdmin() {
   async function criarConta(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     const parsed = criarSchema.safeParse(criar);
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message);
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message); return; }
     setLoading(true);
     const email = adminUserToEmail(parsed.data.usuario);
     const { data, error } = await supabase.auth.signUp({
@@ -94,11 +94,11 @@ function AcessoAdmin() {
         });
         if (loginError) {
           setLoading(false);
-          return toast.error("Este usuário já existe e a senha não confere.");
+          { toast.error("Este usuário já existe e a senha não confere."); return; }
         }
       } else {
         setLoading(false);
-        return toast.error(`Não foi possível criar o acesso: ${error.message}`);
+        { toast.error(`Não foi possível criar o acesso: ${error.message}`); return; }
       }
     } else if (!data.session) {
       const { error: loginError } = await supabase.auth.signInWithPassword({
@@ -107,7 +107,7 @@ function AcessoAdmin() {
       });
       if (loginError) {
         setLoading(false);
-        return toast.error("Acesso criado, mas não foi possível entrar. Tente na aba Entrar.");
+        { toast.error("Acesso criado, mas não foi possível entrar. Tente na aba Entrar."); return; }
       }
     }
 
@@ -117,7 +117,7 @@ function AcessoAdmin() {
     setLoading(false);
     if (rpcError || !ok) {
       await supabase.auth.signOut();
-      return toast.error("Código de administrador inválido.");
+      { toast.error("Código de administrador inválido."); return; }
     }
     await queryClient.invalidateQueries();
     toast.success("Acesso de administrador liberado!");

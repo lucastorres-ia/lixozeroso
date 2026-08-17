@@ -20,7 +20,11 @@ export const meQueryOptions = {
     if (!user) return null;
 
     const [{ data: profile }, { data: roles }, { data: adminExists }] = await Promise.all([
-      supabase.from("profiles").select("nome, sala_id, salas(nome)").eq("id", user.id).maybeSingle(),
+      supabase
+        .from("profiles")
+        .select("nome, ra, sala_id, salas(nome)")
+        .eq("id", user.id)
+        .maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", user.id),
       supabase.rpc("admin_exists"),
     ]);

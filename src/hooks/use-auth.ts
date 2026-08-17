@@ -32,6 +32,7 @@ export const meQueryOptions = {
     return {
       userId: user.id,
       email: user.email ?? null,
+      ra: profile?.ra ?? null,
       nome: profile?.nome || user.email?.split("@")[0] || "Aluno",
       salaId: profile?.sala_id ?? null,
       salaNome: (profile?.salas as { nome: string } | null)?.nome ?? null,

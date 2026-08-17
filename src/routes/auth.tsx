@@ -1,7 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Leaf } from "lucide-react";
+import { Leaf, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -20,27 +20,38 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/hooks/use-auth";
+import { normalizeRa, raToEmail } from "@/lib/ra";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar — Lixo Zero" },
+      { title: "Entrar com R.A. — Lixo Zero" },
       {
         name: "description",
-        content: "Acesse sua conta ou cadastre-se escolhendo a sua sala para registrar coletas.",
+        content:
+          "Alunos entram no Lixo Zero com o R.A. e a senha para registrar as coletas da sua sala.",
       },
-      { property: "og:title", content: "Entrar — Lixo Zero" },
+      { property: "og:title", content: "Entrar com R.A. — Lixo Zero" },
       {
         property: "og:description",
-        content: "Acesse sua conta Lixo Zero e registre as coletas da sua sala.",
+        content: "Acesse com seu R.A. e senha e registre as coletas da sua sala.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AuthPage,
 });
 
+const raField = z
+  .string()
+  .trim()
+  .min(4, { message: "Informe seu R.A. (mínimo 4 caracteres)" })
+  .max(30, { message: "R.A. muito longo" })
+  .refine((v) => normalizeRa(v).length >= 4, { message: "R.A. inválido" });
+
 const loginSchema = z.object({
-  email: z.string().trim().email({ message: "E-mail inválido" }).max(255),
+  ra: raField,
   senha: z.string().min(6, { message: "A senha deve ter no mínimo 6 caracteres" }).max(72),
 });
 
@@ -54,10 +65,9 @@ function AuthPage() {
   const queryClient = useQueryClient();
   const { data: me } = useMe();
   const [loading, setLoading] = useState(false);
-  const [aviso, setAviso] = useState<string | null>(null);
 
-  const [loginData, setLoginData] = useState({ email: "", senha: "" });
-  const [signupData, setSignupData] = useState({ nome: "", email: "", senha: "", salaId: "" });
+  const [loginData, setLoginData] = useState({ ra: "", senha: "" });
+  const [signupData, setSignupData] = useState({ nome: "", ra: "", senha: "", salaId: "" });
 
   const salas = useQuery({
     queryKey: ["salas"],
@@ -81,17 +91,12 @@ function AuthPage() {
     }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
-      email: parsed.data.email,
+      email: raToEmail(parsed.data.ra),
       password: parsed.data.senha,
     });
     setLoading(false);
     if (error) {
-      const m = error.message.toLowerCase();
-      toast.error(
-        m.includes("not confirmed")
-          ? "Confirme seu e-mail antes de entrar."
-          : "E-mail ou senha incorretos.",
-      );
+      toast.error("R.A. ou senha incorretos.");
       return;
     }
     await queryClient.invalidateQueries();
@@ -106,12 +111,12 @@ function AuthPage() {
       return;
     }
     setLoading(true);
+    const ra = normalizeRa(parsed.data.ra);
     const { data, error } = await supabase.auth.signUp({
-      email: parsed.data.email,
+      email: raToEmail(ra),
       password: parsed.data.senha,
       options: {
-        emailRedirectTo: window.location.origin,
-        data: { nome: parsed.data.nome, sala_id: parsed.data.salaId },
+        data: { nome: parsed.data.nome, sala_id: parsed.data.salaId, ra },
       },
     });
     setLoading(false);
@@ -119,13 +124,11 @@ function AuthPage() {
       const m = error.message.toLowerCase();
       let msg = `Não foi possível criar a conta: ${error.message}`;
       if (m.includes("already") || m.includes("registered")) {
-        msg = "Este e-mail já está cadastrado. Use a aba Entrar.";
+        msg = "Este R.A. já tem conta. Use a aba Entrar.";
       } else if (m.includes("weak") || m.includes("pwned")) {
-        msg = "Essa senha é muito fraca ou comum. Escolha outra com letras e números.";
+        msg = "Essa senha é muito fraca. Escolha outra com letras e números.";
       } else if (m.includes("password")) {
         msg = "A senha deve ter no mínimo 6 caracteres.";
-      } else if (m.includes("invalid") && m.includes("email")) {
-        msg = "E-mail inválido. Confira o endereço digitado.";
       } else if (m.includes("rate") || m.includes("seconds")) {
         msg = "Muitas tentativas. Aguarde alguns instantes e tente de novo.";
       }
@@ -133,8 +136,7 @@ function AuthPage() {
       return;
     }
     if (!data.session) {
-      setAviso("Cadastro criado! Confirme o e-mail que enviamos para poder entrar.");
-      toast.success("Confira seu e-mail para confirmar o cadastro.");
+      toast.success("Conta criada! Agora entre com seu R.A. e senha.");
       return;
     }
     await queryClient.invalidateQueries();
@@ -148,23 +150,18 @@ function AuthPage() {
           <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-hero-gradient text-primary-foreground">
             <Leaf className="size-6" />
           </span>
-          <h1 className="mt-4 text-2xl font-bold">Acesso ao Lixo Zero</h1>
+          <h1 className="mt-4 text-2xl font-bold">Acesso do aluno</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Entre para registrar as coletas da sua sala.
+            Entre com o seu R.A. e senha para registrar as coletas da sua sala.
           </p>
         </div>
 
         <Card className="shadow-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Sua conta</CardTitle>
-            <CardDescription>Use o e-mail informado à coordenação.</CardDescription>
+            <CardDescription>Use o R.A. da sua matrícula escolar.</CardDescription>
           </CardHeader>
           <CardContent>
-            {aviso ? (
-              <p className="mb-4 rounded-lg bg-secondary px-3 py-2 text-sm text-secondary-foreground">
-                {aviso}
-              </p>
-            ) : null}
             <Tabs defaultValue="entrar">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="entrar">Entrar</TabsTrigger>
@@ -174,13 +171,14 @@ function AuthPage() {
               <TabsContent value="entrar">
                 <form onSubmit={handleLogin} className="space-y-4 pt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">E-mail</Label>
+                    <Label htmlFor="login-ra">R.A. do aluno</Label>
                     <Input
-                      id="login-email"
-                      type="email"
-                      autoComplete="email"
-                      value={loginData.email}
-                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                      id="login-ra"
+                      inputMode="numeric"
+                      autoComplete="username"
+                      placeholder="Ex.: 0012345678"
+                      value={loginData.ra}
+                      onChange={(e) => setLoginData({ ...loginData, ra: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
@@ -210,6 +208,16 @@ function AuthPage() {
                     />
                   </div>
                   <div className="space-y-2">
+                    <Label htmlFor="signup-ra">R.A. do aluno</Label>
+                    <Input
+                      id="signup-ra"
+                      inputMode="numeric"
+                      placeholder="Ex.: 0012345678"
+                      value={signupData.ra}
+                      onChange={(e) => setSignupData({ ...signupData, ra: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="sala">Sua sala</Label>
                     <Select
                       value={signupData.salaId}
@@ -228,16 +236,6 @@ function AuthPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">E-mail</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      autoComplete="email"
-                      value={signupData.email}
-                      onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
                     <Label htmlFor="signup-senha">Senha</Label>
                     <Input
                       id="signup-senha"
@@ -246,6 +244,9 @@ function AuthPage() {
                       value={signupData.senha}
                       onChange={(e) => setSignupData({ ...signupData, senha: e.target.value })}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Guarde bem sua senha: sem e-mail cadastrado, só a coordenação pode redefini-la.
+                    </p>
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Criando conta..." : "Criar conta"}
@@ -255,6 +256,12 @@ function AuthPage() {
             </Tabs>
           </CardContent>
         </Card>
+
+        <Button asChild variant="ghost" size="sm" className="mt-4 w-full">
+          <Link to="/acesso-admin">
+            <ShieldCheck className="size-4" /> Sou da coordenação (acesso admin)
+          </Link>
+        </Button>
       </div>
     </AppShell>
   );

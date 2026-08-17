@@ -52,6 +52,7 @@ function Admin() {
         ),
     });
 
+  const [codigoNovo, setCodigoNovo] = useState("");
   const [novaSala, setNovaSala] = useState({ nome: "", turno: "Manhã" });
   const [novoMaterial, setNovoMaterial] = useState({ nome: "", unidade: "kg", pontos: "1" });
 
@@ -97,7 +98,7 @@ function Admin() {
     enabled: !!me?.isAdmin,
     queryFn: async () => {
       const [{ data: perfis, error }, { data: papeis }] = await Promise.all([
-        supabase.from("profiles").select("id, nome, sala_id, salas(nome)").order("nome"),
+        supabase.from("profiles").select("id, nome, ra, sala_id, salas(nome)").order("nome"),
         supabase.from("user_roles").select("user_id, role"),
       ]);
       if (error) throw error;
@@ -106,6 +107,30 @@ function Admin() {
         isAdmin: (papeis ?? []).some((r) => r.user_id === p.id && r.role === "admin"),
       }));
     },
+  });
+
+  const codigoAdmin = useQuery({
+    queryKey: ["admin-codigo"],
+    enabled: !!me?.isAdmin,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_codigo");
+      if (error) throw error;
+      return data ?? "";
+    },
+  });
+
+  const salvarCodigo = useMutation({
+    mutationFn: async (novo: string) => {
+      const { data, error } = await supabase.rpc("set_admin_codigo", { _codigo: novo.trim() });
+      if (error) throw error;
+      if (!data) throw new Error("Use um código com no mínimo 6 caracteres");
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Código de administrador atualizado.");
+      queryClient.invalidateQueries({ queryKey: ["admin-codigo"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Não foi possível salvar o código."),
   });
 
   const avaliar = useMutation({
@@ -474,7 +499,42 @@ function Admin() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="usuarios" className="pt-4">
+          <TabsContent value="usuarios" className="space-y-4 pt-4">
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="text-base">Código de administrador</CardTitle>
+                <CardDescription>
+                  Quem informar este código em "Acesso da coordenação" se torna administrador.
+                  Compartilhe somente com a equipe.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap items-end gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Código atual</Label>
+                  <p className="rounded-md border border-input bg-muted/40 px-3 py-1.5 font-mono text-sm">
+                    {codigoAdmin.data || "—"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="novo-codigo" className="text-xs">
+                    Novo código (mín. 6 caracteres)
+                  </Label>
+                  <Input
+                    id="novo-codigo"
+                    className="w-56"
+                    value={codigoNovo}
+                    onChange={(e) => setCodigoNovo(e.target.value)}
+                  />
+                </div>
+                <Button
+                  onClick={() => salvarCodigo.mutate(codigoNovo)}
+                  disabled={salvarCodigo.isPending || codigoNovo.trim().length < 6}
+                >
+                  Salvar código
+                </Button>
+              </CardContent>
+            </Card>
+
             <Card className="shadow-card">
               <CardHeader>
                 <CardTitle className="text-base">Usuários</CardTitle>
@@ -489,6 +549,7 @@ function Admin() {
                     <div className="min-w-[160px] flex-1">
                       <p className="text-sm font-medium">{u.nome}</p>
                       <p className="text-xs text-muted-foreground">
+                        R.A. {u.ra ?? "—"} ·{" "}
                         {(u.salas as { nome: string } | null)?.nome ?? "Sem sala"}
                       </p>
                     </div>

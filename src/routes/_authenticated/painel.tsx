@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { CheckCircle2, Clock, ShieldPlus, Trash2, XCircle } from "lucide-react";
@@ -99,19 +99,6 @@ function Painel() {
     onError: () => toast.error("Não foi possível salvar a sala."),
   });
 
-  const virarAdmin = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.rpc("claim_admin");
-      if (error) throw error;
-      if (!data) throw new Error("Já existe administrador");
-      return data;
-    },
-    onSuccess: () => {
-      toast.success("Você agora é administrador!");
-      queryClient.invalidateQueries();
-    },
-    onError: () => toast.error("Já existe um administrador neste sistema."),
-  });
 
   const registrar = useMutation({
     mutationFn: async () => {
@@ -173,11 +160,14 @@ function Painel() {
               <div>
                 <p className="font-medium">Nenhum administrador definido</p>
                 <p className="text-sm text-muted-foreground">
-                  Como este é o primeiro acesso, você pode assumir a administração do sistema.
+                  A coordenação cria o acesso de administrador em "Acesso da coordenação" usando o
+                  código de administrador.
                 </p>
               </div>
-              <Button onClick={() => virarAdmin.mutate()} disabled={virarAdmin.isPending}>
-                <ShieldPlus className="mr-2 size-4" /> Tornar-me administrador
+              <Button asChild variant="outline">
+                <Link to="/acesso-admin">
+                  <ShieldPlus className="mr-2 size-4" /> Acesso da coordenação
+                </Link>
               </Button>
             </CardContent>
           </Card>

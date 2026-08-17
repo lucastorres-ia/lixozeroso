@@ -160,11 +160,14 @@ function Painel() {
               <div>
                 <p className="font-medium">Nenhum administrador definido</p>
                 <p className="text-sm text-muted-foreground">
-                  Como este é o primeiro acesso, você pode assumir a administração do sistema.
+                  A coordenação cria o acesso de administrador em "Acesso da coordenação" usando o
+                  código de administrador.
                 </p>
               </div>
-              <Button onClick={() => virarAdmin.mutate()} disabled={virarAdmin.isPending}>
-                <ShieldPlus className="mr-2 size-4" /> Tornar-me administrador
+              <Button asChild variant="outline">
+                <Link to="/acesso-admin">
+                  <ShieldPlus className="mr-2 size-4" /> Acesso da coordenação
+                </Link>
               </Button>
             </CardContent>
           </Card>

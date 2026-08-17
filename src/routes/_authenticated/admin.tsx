@@ -108,6 +108,30 @@ function Admin() {
     },
   });
 
+  const codigoAdmin = useQuery({
+    queryKey: ["admin-codigo"],
+    enabled: !!me?.isAdmin,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_codigo");
+      if (error) throw error;
+      return data ?? "";
+    },
+  });
+
+  const salvarCodigo = useMutation({
+    mutationFn: async (novo: string) => {
+      const { data, error } = await supabase.rpc("set_admin_codigo", { _codigo: novo.trim() });
+      if (error) throw error;
+      if (!data) throw new Error("Use um código com no mínimo 6 caracteres");
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Código de administrador atualizado.");
+      queryClient.invalidateQueries({ queryKey: ["admin-codigo"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Não foi possível salvar o código."),
+  });
+
   const avaliar = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: "aprovada" | "rejeitada" }) => {
       const { error } = await supabase.from("coletas").update({ status }).eq("id", id);

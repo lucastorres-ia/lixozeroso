@@ -52,6 +52,7 @@ function Admin() {
         ),
     });
 
+  const [codigoNovo, setCodigoNovo] = useState("");
   const [novaSala, setNovaSala] = useState({ nome: "", turno: "Manhã" });
   const [novoMaterial, setNovoMaterial] = useState({ nome: "", unidade: "kg", pontos: "1" });
 

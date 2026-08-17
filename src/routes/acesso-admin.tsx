@@ -57,7 +57,7 @@ function AcessoAdmin() {
   const [login, setLogin] = useState({ usuario: "", senha: "" });
   const [criar, setCriar] = useState({ nome: "", usuario: "", senha: "", codigo: "" });
 
-  async function entrar(e: React.FormEvent) {
+  async function entrar(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     const parsed = schema.safeParse(login);
     if (!parsed.success) return toast.error(parsed.error.issues[0]?.message);
@@ -72,7 +72,7 @@ function AcessoAdmin() {
     navigate({ to: "/admin", replace: true });
   }
 
-  async function criarConta(e: React.FormEvent) {
+  async function criarConta(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     const parsed = criarSchema.safeParse(criar);
     if (!parsed.success) return toast.error(parsed.error.issues[0]?.message);

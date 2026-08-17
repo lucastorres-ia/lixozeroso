@@ -97,7 +97,7 @@ function Admin() {
     enabled: !!me?.isAdmin,
     queryFn: async () => {
       const [{ data: perfis, error }, { data: papeis }] = await Promise.all([
-        supabase.from("profiles").select("id, nome, sala_id, salas(nome)").order("nome"),
+        supabase.from("profiles").select("id, nome, ra, sala_id, salas(nome)").order("nome"),
         supabase.from("user_roles").select("user_id, role"),
       ]);
       if (error) throw error;

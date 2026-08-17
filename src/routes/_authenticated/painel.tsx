@@ -99,19 +99,6 @@ function Painel() {
     onError: () => toast.error("Não foi possível salvar a sala."),
   });
 
-  const virarAdmin = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.rpc("claim_admin");
-      if (error) throw error;
-      if (!data) throw new Error("Já existe administrador");
-      return data;
-    },
-    onSuccess: () => {
-      toast.success("Você agora é administrador!");
-      queryClient.invalidateQueries();
-    },
-    onError: () => toast.error("Já existe um administrador neste sistema."),
-  });
 
   const registrar = useMutation({
     mutationFn: async () => {

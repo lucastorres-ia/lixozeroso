@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export type Me = {
   userId: string;
   email: string | null;
+  ra: string | null;
   nome: string;
   salaId: string | null;
   salaNome: string | null;

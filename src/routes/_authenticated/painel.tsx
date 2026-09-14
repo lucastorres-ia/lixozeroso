@@ -102,7 +102,9 @@ function Painel() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("coletas")
-        .select("id, quantidade, pontos, status, observacao, created_at, materiais(nome, unidade)")
+        .select(
+          "id, quantidade, pontos, status, observacao, created_at, foto_path, materiais(nome, unidade)",
+        )
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];

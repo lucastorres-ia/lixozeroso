@@ -1,10 +1,13 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { CheckCircle2, Clock, ShieldPlus, Trash2, XCircle } from "lucide-react";
+import { useRef, useState } from "react";
+import { CheckCircle2, Camera, Clock, ShieldPlus, Trash2, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 
 import { AppShell } from "@/components/AppShell";
+import { FotoColeta } from "@/components/FotoColeta";
+import { verificarFoto } from "@/lib/moderacao.functions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

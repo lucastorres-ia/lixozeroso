@@ -361,6 +361,7 @@ function Painel() {
                       key={c.id}
                       className="flex items-center gap-3 rounded-xl border border-border/70 px-3 py-2"
                     >
+                      <FotoColeta path={c.foto_path} />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">
                           {material?.nome} — {Number(c.quantidade)} {material?.unidade}

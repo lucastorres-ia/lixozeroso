@@ -1,10 +1,13 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { CheckCircle2, Clock, ShieldPlus, Trash2, XCircle } from "lucide-react";
+import { useRef, useState } from "react";
+import { CheckCircle2, Camera, Clock, ShieldPlus, Trash2, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 
 import { AppShell } from "@/components/AppShell";
+import { FotoColeta } from "@/components/FotoColeta";
+import { verificarFoto } from "@/lib/moderacao.functions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +54,25 @@ function Painel() {
   const [quantidade, setQuantidade] = useState("");
   const [observacao, setObservacao] = useState("");
   const [salaEscolhida, setSalaEscolhida] = useState("");
+  const [foto, setFoto] = useState<File | null>(null);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const [etapa, setEtapa] = useState<string | null>(null);
+  const fotoInputRef = useRef<HTMLInputElement>(null);
+  const checarFoto = useServerFn(verificarFoto);
+
+  const lerComoDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error("Não foi possível ler a foto."));
+      reader.readAsDataURL(file);
+    });
+
+  const escolherFoto = (file: File | null) => {
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview);
+    setFoto(file);
+    setFotoPreview(file ? URL.createObjectURL(file) : null);
+  };
 
   const salas = useQuery({
     queryKey: ["salas"],
@@ -80,7 +102,9 @@ function Painel() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("coletas")
-        .select("id, quantidade, pontos, status, observacao, created_at, materiais(nome, unidade)")
+        .select(
+          "id, quantidade, pontos, status, observacao, created_at, foto_path, materiais(nome, unidade)",
+        )
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
@@ -106,22 +130,48 @@ function Painel() {
       if (!materialId) throw new Error("Escolha o material");
       if (!Number.isFinite(qtd) || qtd <= 0) throw new Error("Informe uma quantidade válida");
       if (!me?.salaId) throw new Error("Defina a sua sala antes de registrar");
+      if (!foto) throw new Error("Anexe uma foto da coleta");
+      if (!foto.type.startsWith("image/")) throw new Error("O arquivo precisa ser uma imagem");
+      if (foto.size > 10 * 1024 * 1024) throw new Error("A foto deve ter no máximo 10 MB");
+
+      setEtapa("Verificando a foto...");
+      const dataUrl = await lerComoDataUrl(foto);
+      const veredito = await checarFoto({ data: { dataUrl } });
+      if (!veredito.ok) throw new Error(`Foto recusada: ${veredito.motivo}`);
+
+      setEtapa("Enviando a foto...");
+      const extensao = foto.name.split(".").pop()?.toLowerCase().slice(0, 5) || "jpg";
+      const path = `${me.userId}/${crypto.randomUUID()}.${extensao}`;
+      const { error: uploadError } = await supabase.storage
+        .from("coletas-fotos")
+        .upload(path, foto, { contentType: foto.type, upsert: false });
+      if (uploadError) throw new Error("Não foi possível enviar a foto. Tente novamente.");
+
+      setEtapa("Registrando a coleta...");
       const { error } = await supabase.from("coletas").insert({
         user_id: me.userId,
         sala_id: me.salaId,
         material_id: materialId,
         quantidade: qtd,
         observacao: observacao.trim() ? observacao.trim().slice(0, 300) : null,
+        foto_path: path,
+        foto_verificada: true,
       });
-      if (error) throw error;
+      if (error) {
+        await supabase.storage.from("coletas-fotos").remove([path]);
+        throw error;
+      }
     },
     onSuccess: () => {
-      toast.success("Coleta registrada! Aguarde a aprovação da coordenação.");
+      toast.success("Coleta registrada com foto verificada! Aguarde a aprovação da coordenação.");
       setQuantidade("");
       setObservacao("");
+      escolherFoto(null);
+      if (fotoInputRef.current) fotoInputRef.current.value = "";
       queryClient.invalidateQueries({ queryKey: ["minhas-coletas"] });
     },
     onError: (e: Error) => toast.error(e.message || "Não foi possível registrar."),
+    onSettled: () => setEtapa(null),
   });
 
   const excluir = useMutation({
@@ -245,15 +295,53 @@ function Painel() {
                   onChange={(e) => setObservacao(e.target.value)}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="foto">Foto da coleta (obrigatória)</Label>
+                <Input
+                  id="foto"
+                  ref={fotoInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={(e) => escolherFoto(e.target.files?.[0] ?? null)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  A foto passa por uma verificação automática e conteúdo impróprio ou sem relação
+                  com a coleta é recusado.
+                </p>
+                {fotoPreview ? (
+                  <div className="flex items-center gap-3 rounded-lg border border-border/70 p-2">
+                    <img
+                      src={fotoPreview}
+                      alt="Pré-visualização da foto da coleta"
+                      className="size-16 rounded-md object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs">{foto?.name}</p>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          escolherFoto(null);
+                          if (fotoInputRef.current) fotoInputRef.current.value = "";
+                        }}
+                      >
+                        Trocar foto
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
               <div className="rounded-lg bg-secondary/60 px-3 py-2 text-sm">
                 Pontos previstos: <strong>{pontosPrevistos.toLocaleString("pt-BR")}</strong>
               </div>
               <Button
                 className="w-full"
                 onClick={() => registrar.mutate()}
-                disabled={registrar.isPending || !me?.salaId}
+                disabled={registrar.isPending || !me?.salaId || !foto}
               >
-                {registrar.isPending ? "Registrando..." : "Registrar coleta"}
+                <Camera className="mr-2 size-4" />
+                {registrar.isPending ? (etapa ?? "Registrando...") : "Registrar coleta com foto"}
               </Button>
             </CardContent>
           </Card>
@@ -273,6 +361,7 @@ function Painel() {
                       key={c.id}
                       className="flex items-center gap-3 rounded-xl border border-border/70 px-3 py-2"
                     >
+                      <FotoColeta path={c.foto_path} />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">
                           {material?.nome} — {Number(c.quantidade)} {material?.unidade}

@@ -5,6 +5,7 @@ import { CheckCircle2, Plus, Save, ShieldCheck, Trash2, XCircle } from "lucide-r
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
+import { FotoColeta } from "@/components/FotoColeta";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,7 +64,7 @@ function Admin() {
       const { data, error } = await supabase
         .from("coletas")
         .select(
-          "id, quantidade, pontos, status, observacao, created_at, salas(nome), materiais(nome, unidade), profiles(nome)",
+          "id, quantidade, pontos, status, observacao, created_at, foto_path, salas(nome), materiais(nome, unidade), profiles(nome)",
         )
         .order("created_at", { ascending: false })
         .limit(200);
@@ -320,6 +321,7 @@ function Admin() {
                         key={c.id}
                         className="flex flex-wrap items-center gap-3 rounded-xl border border-border/70 px-3 py-2"
                       >
+                        <FotoColeta path={c.foto_path} />
                         <div className="min-w-[200px] flex-1">
                           <p className="text-sm font-medium">
                             {sala?.nome} · {material?.nome} — {Number(c.quantidade)}{" "}

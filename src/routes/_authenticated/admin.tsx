@@ -5,6 +5,7 @@ import { CheckCircle2, Plus, Save, ShieldCheck, Trash2, XCircle } from "lucide-r
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
+import { FotoColeta } from "@/components/FotoColeta";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

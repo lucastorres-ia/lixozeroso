@@ -19,6 +19,8 @@ export type Database = {
           avaliado_em: string | null
           avaliado_por: string | null
           created_at: string
+          foto_path: string | null
+          foto_verificada: boolean
           id: string
           material_id: string
           observacao: string | null
@@ -32,6 +34,8 @@ export type Database = {
           avaliado_em?: string | null
           avaliado_por?: string | null
           created_at?: string
+          foto_path?: string | null
+          foto_verificada?: boolean
           id?: string
           material_id: string
           observacao?: string | null
@@ -45,6 +49,8 @@ export type Database = {
           avaliado_em?: string | null
           avaliado_por?: string | null
           created_at?: string
+          foto_path?: string | null
+          foto_verificada?: boolean
           id?: string
           material_id?: string
           observacao?: string | null

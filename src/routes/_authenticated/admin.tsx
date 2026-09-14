@@ -63,7 +63,7 @@ function Admin() {
       const { data, error } = await supabase
         .from("coletas")
         .select(
-          "id, quantidade, pontos, status, observacao, created_at, salas(nome), materiais(nome, unidade), profiles(nome)",
+          "id, quantidade, pontos, status, observacao, created_at, foto_path, salas(nome), materiais(nome, unidade), profiles(nome)",
         )
         .order("created_at", { ascending: false })
         .limit(200);

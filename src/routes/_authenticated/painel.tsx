@@ -54,6 +54,25 @@ function Painel() {
   const [quantidade, setQuantidade] = useState("");
   const [observacao, setObservacao] = useState("");
   const [salaEscolhida, setSalaEscolhida] = useState("");
+  const [foto, setFoto] = useState<File | null>(null);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const [etapa, setEtapa] = useState<string | null>(null);
+  const fotoInputRef = useRef<HTMLInputElement>(null);
+  const checarFoto = useServerFn(verificarFoto);
+
+  const lerComoDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error("Não foi possível ler a foto."));
+      reader.readAsDataURL(file);
+    });
+
+  const escolherFoto = (file: File | null) => {
+    if (fotoPreview) URL.revokeObjectURL(fotoPreview);
+    setFoto(file);
+    setFotoPreview(file ? URL.createObjectURL(file) : null);
+  };
 
   const salas = useQuery({
     queryKey: ["salas"],

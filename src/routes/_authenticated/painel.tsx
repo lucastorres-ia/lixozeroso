@@ -295,15 +295,53 @@ function Painel() {
                   onChange={(e) => setObservacao(e.target.value)}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="foto">Foto da coleta (obrigatória)</Label>
+                <Input
+                  id="foto"
+                  ref={fotoInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={(e) => escolherFoto(e.target.files?.[0] ?? null)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  A foto passa por uma verificação automática e conteúdo impróprio ou sem relação
+                  com a coleta é recusado.
+                </p>
+                {fotoPreview ? (
+                  <div className="flex items-center gap-3 rounded-lg border border-border/70 p-2">
+                    <img
+                      src={fotoPreview}
+                      alt="Pré-visualização da foto da coleta"
+                      className="size-16 rounded-md object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs">{foto?.name}</p>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          escolherFoto(null);
+                          if (fotoInputRef.current) fotoInputRef.current.value = "";
+                        }}
+                      >
+                        Trocar foto
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
               <div className="rounded-lg bg-secondary/60 px-3 py-2 text-sm">
                 Pontos previstos: <strong>{pontosPrevistos.toLocaleString("pt-BR")}</strong>
               </div>
               <Button
                 className="w-full"
                 onClick={() => registrar.mutate()}
-                disabled={registrar.isPending || !me?.salaId}
+                disabled={registrar.isPending || !me?.salaId || !foto}
               >
-                {registrar.isPending ? "Registrando..." : "Registrar coleta"}
+                <Camera className="mr-2 size-4" />
+                {registrar.isPending ? (etapa ?? "Registrando...") : "Registrar coleta com foto"}
               </Button>
             </CardContent>
           </Card>
